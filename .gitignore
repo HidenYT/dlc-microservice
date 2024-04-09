@@ -1,5 +1,6 @@
 .env
 .vscode/
 __pycache__/
+src/uploads/
 venv/
 celerybeat-schedule.*
