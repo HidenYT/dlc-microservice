@@ -20,4 +20,4 @@ def generate_dataset_folder_name(model_uuid: UUID) -> str:
     )
 
 def get_model_folder_path(model_uid: UUID) -> str:
-    return "-" + os.path.join(current_app.config["NETWORKS_DIR_PATH"], str(model_uid))
+    return os.path.join(current_app.config["NETWORKS_DIR_PATH"], "-" + str(model_uid) + datetime.now().strftime("-%Y-%m-%d"))

@@ -10,7 +10,6 @@ import yaml
 from yaml import SafeDumper
 from app.utils.training import TrainingConfigAdapter
 import os
-from secrets import token_urlsafe
 
 
 class DLCProjectCreator:
@@ -65,20 +64,19 @@ class DLCProjectCreator:
         with open(config_path, "w") as f:
             f.write(yaml.safe_dump(data, default_flow_style=False))
     
-    def _fill_training_config(self, project_path: str, config_path: str):
-        with open(config_path, "r") as f:
-            pose_cfg_path = os.path.join(project_path, "dlc-models", "iteration-0")
-            pose_cfg_path = glob.glob(os.path.join(pose_cfg_path, "*"))[0]
-            pose_cfg_path = os.path.join(pose_cfg_path, "train", "pose_cfg.yaml")
-        with open(pose_cfg_path, "r") as f:
-            pose_cfg_data = yaml.safe_load(f)
-            pose_cfg_data["lr_init"] = self.adapter.lr_init
-            SafeDumper.add_representer(
-                type(None),
-                lambda dumper, value: dumper.represent_scalar(u'tag:yaml.org,2002:null', '')
-            )
-        with open(pose_cfg_path, "w") as f:
-            f.write(yaml.safe_dump(pose_cfg_data, default_flow_style=False))
+    # def _fill_training_config(self, project_path: str, config_path: str):
+    #     with open(config_path, "r") as f:
+    #         pose_cfg_path = os.path.join(project_path, "dlc-models", "iteration-0")
+    #         pose_cfg_path = glob.glob(os.path.join(pose_cfg_path, "*"))[0]
+    #         pose_cfg_path = os.path.join(pose_cfg_path, "train", "pose_cfg.yaml")
+    #     with open(pose_cfg_path, "r") as f:
+    #         pose_cfg_data = yaml.safe_load(f)
+    #         SafeDumper.add_representer(
+    #             type(None),
+    #             lambda dumper, value: dumper.represent_scalar(u'tag:yaml.org,2002:null', '')
+    #         )
+    #     with open(pose_cfg_path, "w") as f:
+    #         f.write(yaml.safe_dump(pose_cfg_data, default_flow_style=False))
 
 
     def create_project(self) -> str:
@@ -109,7 +107,7 @@ class DLCProjectCreator:
 
         deeplabcut.create_training_dataset(proj_config, net_type=self.adapter.net_type)
 
-        # Дозаполняем настройки обучения
-        self._fill_training_config(project_path, proj_config)
+        # Дозаполняем настройки обучения [Пока не используется]
+        # self._fill_training_config(project_path, proj_config)
 
         return proj_config

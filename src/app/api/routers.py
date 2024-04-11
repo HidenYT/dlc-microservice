@@ -1,14 +1,15 @@
 import datetime
 import json
-import os
 from typing import Any
-from uuid import uuid4
-from flask import current_app, request
+from uuid import UUID, uuid4
+from flask import request
 from celery.result import AsyncResult
+from werkzeug.exceptions import NotFound
 
 from app.api.models import DLCNeuralNetwork
 from app.api.tasks import train_network_task
 from app.utils.datasets import get_model_folder_path
+from app.utils.training import get_model_training_stats
 from . import bp
 from app.database import db
 
@@ -36,3 +37,10 @@ def train_network_view():
     db.session.commit()
 
     return {"model_uid": model_uid, "task_id": process.id}
+
+@bp.get("/learning-stats")
+def learning_stats_view():
+    model_uid = request.args.get("model_uid")
+    if model_uid is None:
+        raise NotFound("You should provide model_uid in order to retrieve leraning stats of a model")
+    return get_model_training_stats(UUID(model_uid))
