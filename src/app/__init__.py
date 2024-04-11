@@ -10,6 +10,7 @@ def create_app_dirs(app: Flask):
     os.makedirs(app.config["UPLOADS_DIR_NAME"], exist_ok=True)
     os.makedirs(app.config["DATASETS_DIR_PATH"], exist_ok=True)
     os.makedirs(app.config["NETWORKS_DIR_PATH"], exist_ok=True)
+    os.makedirs(app.config["VIDEOS_DIR_PATH"], exist_ok=True)
 
 def create_app(config = config.FlaskConfig):
     app = Flask(__name__)

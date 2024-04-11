@@ -7,6 +7,7 @@ class FlaskConfig:
     UPLOADS_DIR_NAME = "uploads"
     DATASETS_DIR_PATH = os.path.join(UPLOADS_DIR_NAME, "datasets")
     NETWORKS_DIR_PATH = os.path.join(UPLOADS_DIR_NAME, "networks")
+    VIDEOS_DIR_PATH = os.path.join(UPLOADS_DIR_NAME, "videos")
     DUMMY_VIDEO_PATH = os.path.join(UPLOADS_DIR_NAME, "dummy.mp4")
 
     DB_ENGINE = os.getenv('DB_ENGINE')
