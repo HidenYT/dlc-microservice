@@ -19,6 +19,9 @@ class FlaskConfig:
 
     SQLALCHEMY_DATABASE_URI = f"{DB_ENGINE}+psycopg://{DB_USER}:{DB_PASSWORD}@"f"{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
+    SEND_RESULTS_URL = os.getenv("SEND_RESULTS_URL")
+    SEND_RESULTS_TOKEN = os.getenv("SEND_RESULTS_TOKEN")
+
 
 class CeleryConfig:
     broker_url = os.getenv('REDIS_URL')

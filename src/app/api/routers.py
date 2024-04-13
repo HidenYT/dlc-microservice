@@ -10,6 +10,7 @@ from werkzeug.exceptions import NotFound, Conflict
 from app.api.models import DLCNeuralNetwork, InferenceResults
 from app.api.tasks import analyze_video_task, train_network_task
 from app.utils.datasets import get_model_folder_path
+from app.utils.model_info import get_model_info
 from app.utils.training import get_model_training_stats
 from . import bp
 from app.database import db
@@ -70,3 +71,10 @@ def analyze_video_view():
     db.session.commit()
     analyze_video_task.delay(video_base64, file_name, model_uid, inference_results.id)
     return {"results_id": inference_results.id}
+
+@bp.get("/model-info")
+def model_info():
+    model_uid = request.args.get("model_uid")
+    if model_uid is None:
+        raise NotFound("You should provide model_uid in order to retrieve information about a model.")
+    return get_model_info(UUID(model_uid))

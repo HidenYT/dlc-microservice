@@ -2,10 +2,16 @@ import base64
 from datetime import datetime
 import glob
 import os
+from typing import Iterable, Literal, Sequence
 from uuid import uuid4
-
 from flask import current_app
 import pandas as pd
+import requests
+from sqlalchemy import select
+import json
+
+from app.database import db
+from app.api.models import InferenceResults
 
 def new_video_file_name(old_video_file_name: str) -> str:
     _, ext = os.path.splitext(old_video_file_name)
@@ -34,3 +40,33 @@ def create_analysis_dict_from_csv(csv_path: str) -> dict[int, dict[str, list[flo
             else:
                 result[i][bp] = [None, None]
     return result
+
+def find_ready_unsent_analysis_results() -> Sequence[InferenceResults]:
+    q = select(InferenceResults).where(
+        InferenceResults.results_json != None,
+        InferenceResults.sent_back == False
+    )
+    return db.session.scalars(q).all()
+
+def send_analysis_results_back(results: Iterable[InferenceResults]) -> None:
+    result_dict = {
+        "sender": "DeepLabCut", 
+        "results": []
+    }
+    for obj in results:
+        result_dict["results"].append({
+            "id": obj.id,
+            "keypoints": json.loads(obj.results_json)
+        })
+    response = requests.request(
+        method="POST",
+        url=current_app.config["SEND_RESULTS_URL"],
+        json=result_dict,
+        headers={
+            "Authorization": f"Bearer {current_app.config['SEND_RESULTS_TOKEN']}"
+        }
+    )
+    if response.status_code == 200:
+        for obj in results:
+            obj.sent_back = True
+        db.session.commit()
