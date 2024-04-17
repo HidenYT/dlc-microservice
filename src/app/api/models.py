@@ -24,6 +24,5 @@ class InferenceResults(db.Model):
     started_inference_at: Mapped[Optional[datetime]]
     finished_inference_at: Mapped[Optional[datetime]]
     currently_running_inference: Mapped[bool]
-    sent_back: Mapped[bool] = mapped_column(default=False)
     network_uid: Mapped[UUID] = mapped_column(ForeignKey("dlc_neural_network.uid"))
     network: Mapped[DLCNeuralNetwork] = relationship()

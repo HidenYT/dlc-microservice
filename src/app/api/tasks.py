@@ -9,7 +9,7 @@ from app.celery import celery
 from app.utils.dlc_project_creator import DLCProjectCreator
 from app.utils.training import TrainingConfigAdapter, notify_model_finished_training
 from app.database import db
-from app.utils.video_analysis import create_analysis_dict_from_csv, find_analysis_csv, find_ready_unsent_analysis_results, save_video_file, send_analysis_results_back
+from app.utils.video_analysis import create_analysis_dict_from_csv, find_analysis_csv, save_video_file
 
 
 @celery.task
@@ -38,9 +38,3 @@ def analyze_video_task(video_base64: str, video_file_name: str, model_uid: UUID,
     results_model = db.session.execute(select(InferenceResults).where(InferenceResults.id == results_id)).scalar_one()
     results_model.results_json = json.dumps(create_analysis_dict_from_csv(csv_path))
     db.session.commit()
-
-@celery.task
-def send_analysis_back_task():
-    ready_unsent = find_ready_unsent_analysis_results()
-    if not ready_unsent: return
-    send_analysis_results_back(ready_unsent)

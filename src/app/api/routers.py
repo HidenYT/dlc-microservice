@@ -5,7 +5,7 @@ from uuid import UUID, uuid4
 from flask import request
 from celery.result import AsyncResult
 from sqlalchemy import select
-from werkzeug.exceptions import NotFound, Conflict
+from werkzeug.exceptions import NotFound, Conflict, BadRequest
 
 from app.api.models import DLCNeuralNetwork, InferenceResults
 from app.api.tasks import analyze_video_task, train_network_task
@@ -78,3 +78,31 @@ def model_info():
     if model_uid is None:
         raise NotFound("You should provide model_uid in order to retrieve information about a model.")
     return get_model_info(UUID(model_uid))
+
+@bp.get("/inference-results")
+def get_results_view():
+    ids = request.args.get("ids")
+    if not ids:
+        raise BadRequest("You should provide ids")
+    try:
+        ids = list(map(int, ids.split(",")))
+        result = []
+        for id in ids:
+            results_model = db.session.scalar(
+                select(InferenceResults).where(InferenceResults.id == id)
+            )
+            if results_model is None:
+                raise NotFound(f"No results model with id {id}")
+            if results_model.results_json is None:
+                keypoints = None
+            else:
+                keypoints = json.loads(results_model.results_json)
+            result.append({
+                "id": id,
+                "keypoints": keypoints
+            })
+        return result
+    except NotFound as e:
+        raise e
+    except Exception as e:
+        raise BadRequest(str(e))

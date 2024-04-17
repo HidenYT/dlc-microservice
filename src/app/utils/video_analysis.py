@@ -40,33 +40,3 @@ def create_analysis_dict_from_csv(csv_path: str) -> dict[int, dict[str, list[flo
             else:
                 result[i][bp] = [None, None]
     return result
-
-def find_ready_unsent_analysis_results() -> Sequence[InferenceResults]:
-    q = select(InferenceResults).where(
-        InferenceResults.results_json != None,
-        InferenceResults.sent_back == False
-    )
-    return db.session.scalars(q).all()
-
-def send_analysis_results_back(results: Iterable[InferenceResults]) -> None:
-    result_dict = {
-        "sender": "DeepLabCut", 
-        "results": []
-    }
-    for obj in results:
-        result_dict["results"].append({
-            "id": obj.id,
-            "keypoints": json.loads(obj.results_json)
-        })
-    response = requests.request(
-        method="POST",
-        url=current_app.config["SEND_RESULTS_URL"],
-        json=result_dict,
-        headers={
-            "Authorization": f"Bearer {current_app.config['SEND_RESULTS_TOKEN']}"
-        }
-    )
-    if response.status_code == 200:
-        for obj in results:
-            obj.sent_back = True
-        db.session.commit()
